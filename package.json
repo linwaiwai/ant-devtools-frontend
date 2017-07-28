@@ -1,5 +1,5 @@
 {
-  "name": "chrome-devtools-frontend",
+  "name": "ant-devtools-frontend",
   "description": "Chrome DevTools UI",
   "scripts": {
     "build": "gulp --gulpfile scripts/gulp/gulpfile.js",
@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ChromeDevTools/devtools-frontend.git"
+    "url": "git+https://github.com/wenshiqi0/devtools-frontend.git"
   },
   "keywords": [
     "devtools",
@@ -27,6 +27,7 @@
     "blink",
     "debugger"
   ],
+  "main": "indez.js",
   "author": "The Chromium Authors",
   "license": "SEE LICENSE IN https://chromium.googlesource.com/chromium/src/+/master/LICENSE",
   "bugs": {
