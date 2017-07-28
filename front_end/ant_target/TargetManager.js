@@ -1,4 +1,5 @@
 Ant = {};
+Ant.switchTargetMutex = false;
 
 Ant.makeProxyPromiseOnce = (method, payload, callback) =>
   new Promise((resolve, reject) => {
@@ -43,18 +44,23 @@ Ant.TargetManager = class extends Common.Object {
   _webSocketConnectionLostCallback(path) {
     if (path) {
       const { target } = this._targets.get(path);
+      SDK.targetManager.removeTarget(target);
       this._targets.delete(path);
     }
   }
 
   async addNewTarget(path, ws) {
+    if (Ant.switchTargetMutex) return null;
     if (this._targets.has(path)) {
       const old = this._targets.get(path);
       this.setCurrent(path);
       return old;
     }
 
-    const createMainConnection =  (ws, params) =>
+    // mutex block
+    Ant.switchTargetMutex = true;
+
+    const createMainConnection = (ws, params) =>
       new SDK.WebSocketConnection(ws, this._webSocketConnectionLostCallback.bind(this, path), params);
 
     const target = SDK.targetManager.createTarget(path,
@@ -70,6 +76,8 @@ Ant.TargetManager = class extends Common.Object {
 
     this._targets.set(path, { target, model: tinyModel, cssModel });
     this.setCurrent(path);
+
+    Ant.switchTargetMutex = false;
 
     return { target, model: tinyModel };
   }
@@ -122,10 +130,10 @@ Ant.TargetManager = class extends Common.Object {
   }
 
   async switchTarget() {
-    console.log('switch');
-    const { ws, path } = await Ant.makeProxyPromiseOnce('initOnce');
-    await Ant.targetManager.addNewTarget(path, ws);
-    this.dispatchEventToListeners(Ant.TargetManager.Events.switchTarget);
+    const { path, ws } = await Ant.makeProxyPromiseOnce('initOnce');
+    const ret = await Ant.targetManager.addNewTarget(path, ws);
+    if (ret)
+      this.dispatchEventToListeners(Ant.TargetManager.Events.switchTarget);
   }
 
   addModel(target, modelClass, model) {
