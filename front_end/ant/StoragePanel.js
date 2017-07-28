@@ -7,7 +7,7 @@ Ant.StoragePanel = class extends UI.VBox {
 
     this.contentElement.classList.add('storage-view');
 
-    const domStorageModel = this._target.model(Resources.DOMStorageModel);
+    const domStorageModel = Resources.DOMStorageModel.fromTarget(this._target);
 
     domStorageModel.enable();
     domStorageModel.storages().forEach(this._addDOMStorage.bind(this));
