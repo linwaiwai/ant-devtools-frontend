@@ -1,0 +1,69 @@
+{
+    "extensions": [
+        {
+            "type": "view",
+            "location": "panel",
+            "id": "axml",
+            "title": "AXML",
+            "order": 20,
+            "className": "Ant.AxmlPanel",
+            "tags": "ant, tiny, ide"
+        },
+        {
+            "type": "view",
+            "location": "panel",
+            "id": "storage",
+            "title": "Storage",
+            "order": 30,
+            "className": "Ant.StoragePanel",
+            "tags": "ant, tiny, ide"
+        },
+        {
+            "type": "view",
+            "location": "panel",
+            "id": "data",
+            "title": "Data",
+            "order": 40,
+            "className": "Ant.DataPanel",
+            "tags": "ant, tiny, ide"
+        },
+        {
+            "type": "@Common.Revealer",
+            "contextTypes": [
+                "SDK.DOMNode",
+                "SDK.DeferredDOMNode",
+                "SDK.RemoteObject"
+            ],
+            "className": "Elements.ElementsPanel.DOMNodeRevealer"
+        },
+        {
+            "type": "@Common.Revealer",
+            "contextTypes": [
+                "SDK.CSSProperty"
+            ],
+            "className": "Ant.AxmlPanel.CSSPropertyRevealer"
+        },
+        {
+            "type": "@Common.Revealer",
+            "contextTypes": [
+                "SDK.Resource"
+            ],
+            "className": "Ant.AxmlPanel.ResourceRevealer"
+        }
+    ],
+    "dependencies": [
+        "elements",
+        "components",
+        "extensions",
+        "resources"
+    ],
+    "scripts": [
+        "AxmlPanel.js",
+        "StoragePanel.js",
+        "DataPanel.js",
+        "AcssModel.js",
+        "ElementsTreeOutline.js"
+    ],
+    "resources": [
+    ]
+}
