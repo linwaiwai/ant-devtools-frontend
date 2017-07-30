@@ -14,10 +14,22 @@ var gulp = require("gulp");
 var concatenateProtocols = require("./concatenate_protocols.js");
 var utils = require("../utils.js");
 
-var devtoolsPath = path.resolve(path.join(__dirname, "../.."));
-var frontendPath = path.join(devtoolsPath, "front_end");
-var releasePath = path.join(devtoolsPath, "devtools");
-var scriptsPath = path.join(devtoolsPath, "scripts");
+let type;
+var devtoolsPath;
+var frontendPath;
+var frontendBase;
+var releasePath;
+var releaseBase;
+var scriptsPath;
+
+function initPath() {
+    devtoolsPath = path.resolve(path.join(__dirname, "../.."));
+    frontendPath = path.join(devtoolsPath, `front_end/${type}`);
+    frontendBase = path.join(devtoolsPath, "front_end");
+    releasePath = path.join(devtoolsPath, `release/${type}`);
+    releaseBase = path.join(devtoolsPath, "release");
+    scriptsPath = path.join(devtoolsPath, "scripts");
+}
 
 gulp.task("default", ["build"]);
 
@@ -25,8 +37,23 @@ gulp.task("clean", cleanTask);
 function cleanTask()
 {
     del.sync([releasePath], {force: true});
+    if (!fs.existsSync(releaseBase))
+        fs.mkdirSync(releaseBase);
     fs.mkdirSync(releasePath);
 }
+
+gulp.task("setFd", () => {
+    type = 'fd';
+    initPath()
+})
+
+gulp.task("setTiny", () => {
+    type = 'tiny';
+    initPath()
+})
+
+gulp.task("fd", ["setFd", "build"]);
+gulp.task("tiny", ["setTiny", "build"]);
 
 gulp.task("build", ["generateProtocol", "generateSupportedCSSProperties", "generateDevtoolsExtensionAPI", "copyDevtoolsFiles"], buildTask);
 function buildTask()

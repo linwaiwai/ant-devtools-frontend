@@ -1,6 +1,7 @@
 {
   "name": "ant-devtools-frontend",
-  "description": "Chrome DevTools UI",
+  "description": "Ant DevTools UI From Chrome",
+  "version": "0.4.0",
   "scripts": {
     "build": "gulp --gulpfile scripts/gulp/gulpfile.js",
     "build:webview": "webpack -w",
@@ -8,7 +9,7 @@
     "compile:webview": "webpack",
     "start": "node scripts/start_chrome_and_server.js",
     "chrome": "node scripts/chrome_debug_launcher/launch_chrome.js",
-    "server": "node scripts/hosted_mode/server.js",
+    "server": "node scripts/server/server.js",
     "test": "node scripts/npm_test.js",
     "test:build": "node scripts/npm_test.js --build-only",
     "test:run": "node scripts/npm_test.js --test-only",
@@ -18,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wenshiqi0/devtools-frontend.git"
+    "url": "git+https://github.com/wenshiqi0/ant-devtools-frontend.git"
   },
   "keywords": [
     "devtools",
@@ -34,7 +35,11 @@
     "url": "https://bugs.chromium.org/p/chromium/issues/list?can=2&q=component:Platform%3EDevTools%20&sort=-opened&colspec=ID%20Stars%20Owner%20Summary%20Modified%20Opened"
   },
   "homepage": "https://devtools.chrome.com",
-  "dependencies": {},
+  "dependencies": {
+    "koa": "^2.2.0",
+    "koa-convert": "^1.2.0",
+    "koa-static": "^3.0.0"
+  },
   "devDependencies": {
     "async": "1.5.2",
     "clang-format": "1.0.45",
