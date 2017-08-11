@@ -34,7 +34,7 @@ Ant.TinyModel = class extends SDK.DOMModel {
     this._idToDOMNode = {};
     if (payload && 'nodeId' in payload) {
       const parentRoot = Ant.findReactRoot(payload.children[1].children[1]);
-      const root = parentRoot.children[0].children[0];
+      const root = parentRoot.children[0];
       payload.children = [root];
       this._document = new Ant.DOMDocument(this, payload);
     } else {
@@ -63,6 +63,18 @@ Ant.TinyModel = class extends SDK.DOMModel {
       this.dispatchEventToListeners(SDK.DOMModel.Events.NodeInserted, node);
       this._scheduleMutationEvent(node);
     }
+  }
+  
+  /**
+   * @param {!Protocol.DOM.NodeId} nodeId
+   * @param {number} newValue
+   */
+  _childNodeCountUpdated(nodeId, newValue) {
+    var node = this._idToDOMNode[nodeId];
+    if (!node) return;
+    node._childNodeCount = newValue;
+    this.dispatchEventToListeners(SDK.DOMModel.Events.ChildNodeCountUpdated, node);
+    this._scheduleMutationEvent(node);
   }
 
   _loadNodeAttributes() {
@@ -143,11 +155,11 @@ Ant.TinyModel = class extends SDK.DOMModel {
      */
     async function onDocumentAvailable(error, root) {
       const parentRoot = Ant.findReactRoot(root.children[1].children[1]);
-      const newRoot = parentRoot.children[0];
-      await Ant.makeProxyPromiseOnce('setDocumentNodeIdOnce', { root: newRoot.children[0] }, ({ data }) => {
+      const pageRoot = parentRoot.children[0];
+
+      await Ant.makeProxyPromiseOnce('setDocumentNodeIdOnce', { root: pageRoot }, ({ data }) => {
         if (root) {
-          const newRootChild = Ant.replaceTagNameAndAttr(newRoot.children.pop(), data);
-          newRoot.children.push(newRootChild);
+          Ant.initPage(pageRoot);
           self._setDocument(root);
         }
         delete self._pendingDocumentRequestPromise;
@@ -206,7 +218,7 @@ Ant.DOMNode = class {
    * @return {!SDK.DOMNode}
    */
   static create(domModel, doc, isInShadowTree, payload) {
-    if (payload.nodeName === '#comment' && payload.nodeValue.indexOf('react-text') > 0)
+    if (payload.nodeName === '#comment' && (payload.nodeValue.indexOf('react-text') > 0 || payload.nodeValue.indexOf('react-empty') > 0))
       return null;
     var node = new Ant.DOMNode(domModel);
     node._init(doc, isInShadowTree, payload);
@@ -1169,9 +1181,15 @@ Ant.combinedProps = (node, props, model) => {
   });
 };
 
+Ant.initPage = (node) => {
+  node.attributes = [];
+  node.localName = 'page';
+  node.nodeName = 'PAGE';
+}
+
 Ant.findReactRoot = parent => {
   for (const child of parent.children) {
-    if (child.attributes[0] === 'id' && child.attributes[1] === '__react-content')
+    if (child.attributes && child.attributes[0] === 'id' && child.attributes[1] === '__react-content')
       return child;
   }
 };

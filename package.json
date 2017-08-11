@@ -7,7 +7,7 @@
     "build:webview": "webpack -w",
     "dev": "npm run build:webview",
     "compile:webview": "webpack",
-    "start": "node scripts/start_chrome_and_server.js",
+    "start": "node server/server.js",
     "chrome": "node scripts/chrome_debug_launcher/launch_chrome.js",
     "server": "node server/server.js",
     "test": "node scripts/npm_test.js",
@@ -28,7 +28,7 @@
     "blink",
     "debugger"
   ],
-  "main": "indez.js",
+  "main": "index.js",
   "author": "The Chromium Authors",
   "license": "SEE LICENSE IN https://chromium.googlesource.com/chromium/src/+/master/LICENSE",
   "bugs": {
@@ -36,6 +36,7 @@
   },
   "homepage": "https://devtools.chrome.com",
   "dependencies": {
+    "gulp": "^3.9.1",
     "koa": "^2.2.0",
     "koa-convert": "^1.2.0",
     "koa-static": "^3.0.0"

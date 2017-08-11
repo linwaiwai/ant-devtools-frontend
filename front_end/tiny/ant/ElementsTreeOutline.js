@@ -71,13 +71,15 @@ Ant.ElementsTreeOutline = class extends Elements.ElementsTreeOutline {
           // `text` and `button` has span text inside.
           // and we want to display it as inline text.
           if (Ant.spanTags.has(child._localName) || (child._localName === 'label' && child._textChildren)) {
-            let textNode;
+            let textNodes = [];
             if (child._localName === 'text' || (child._localName === 'label' && child._textChildren)) {
               await agent.requestChildNodes(child.id, 1);
-              textNode = child.children()[1];
+              child.children().map(node => {
+                if (node._localName !== 'text') textNodes.push(node);
+              });
             } else {
               const id = await agent.querySelector(child.id, 'span');
-              textNode = Ant.DOMNode.create(Ant.targetManager.getCurrentModel(), child._document, false, {
+              textNodes.push(Ant.DOMNode.create(Ant.targetManager.getCurrentModel(), child._document, false, {
                 nodeId: id + 1,
                 backendNodeId: id,
                 nodeValue: child._textValue,
@@ -85,12 +87,12 @@ Ant.ElementsTreeOutline = class extends Elements.ElementsTreeOutline {
                 childNodeCount: 0,
                 localName: '',
                 nodeName: '#text',
-              });
+              }));
             }
-            if (textNode) {
-              child.firstChild = textNode;
-              child._children = [ textNode ];
-              child.lastChild = textNode;
+            if (textNodes) {
+              child.firstChild = textNodes[0];
+              child._children = textNodes;
+              child.lastChild = textNodes[textNodes.length - 1];
             }
           }
         }

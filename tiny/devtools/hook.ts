@@ -254,7 +254,7 @@ const sendMessage = ({ method, payload }) => {
 }
 
 function fetchRemoteUrl(callback) {
-  const port = 9224;
+  const port = window.__chromePort__;
   const request = new Request(`http://127.0.0.1:${port}/json/list`);
   const path = window.$page.getPagePath();
   fetch(request)
@@ -298,12 +298,19 @@ function mappingDomToNodeIdChildren(parent, children, getReactElementFromNative,
       if (nodeType === 'swiper') return reactComponents;
       try {
         const reactComponent = handleTinyElemets(parent.children[index], getReactElementFromNative);
-        appxForNodeId.set(getInternalInstance(reactComponent), next.nodeId);
-        reactComponents[reactComponents.length - 1] = getTinyData(reactComponent);
+        const speHandled = elementSpecailHandler(reactComponent);
+        appxForNodeId.set(getInternalInstance(speHandled), next.nodeId);
+        reactComponents[reactComponents.length - 1] = getTinyData(speHandled);
       } catch (e) { /* console.log(e); */ }
     });
   }
   return reactComponents;
+}
+
+function elementSpecailHandler(element) {
+  if (element.props && element.props.$tag === 'image')
+    return element._owner._currentElement;
+  return element;
 }
 
 function detectGetReactElementFromNative(dom) {
@@ -331,7 +338,7 @@ function checkReactReady(callback) {
   try {
     const rootDom = document.getElementById('__react-content');
     const { getReactElementFromNative } = detectGetReactElementFromNative(rootDom.children[0].children[0]);
-    if (getReactElementFromNative) {
+    if (getReactElementFromNative && window.__chromePort__) {
       count = 0;
       callback();
     } else {
@@ -362,25 +369,24 @@ const messageHandler = {
   },
   setDocumentNodeIdOnce: ({ root }) => {
     const rootDom = document.getElementById('__react-content');
-    const { rootReactDom } = detectGetReactElementFromNative(rootDom.children[0].children[0]);
-    nodeIdForDom.set(root.nodeId, rootDom.children[0].children[0]);
+    const { rootReactDom } = detectGetReactElementFromNative(rootDom.children[0]);
+
+    nodeIdForDom.set(root.nodeId, rootDom.children[0]);
     updateQueue = [];
     sendMessage({
       method: 'setDocumentNodeIdOnce',
-      payload: {
-        data: getTinyData(rootReactDom._currentElement._owner._currentElement),
-      },
+      payload: {},
     })
   },
   setChildNodeIdOnce: ({ parentId, payloads, nodeType }) => {
     let reactComponents = null;
     const realDom = nodeIdForDom.get(parentId);
     const rootDom = document.getElementById('__react-content');
-    const { getReactElementFromNative } = detectGetReactElementFromNative(realDom || rootDom.children[0].children[0]);
+    const { getReactElementFromNative } = detectGetReactElementFromNative(realDom || rootDom.children[0]);
     if (getReactElementFromNative) {
       if (nodeIdForDom.size === 0 || !realDom) {
-        nodeIdForDom.set(parentId, rootDom.children[0].children[0]);
-        reactComponents = mappingDomToNodeIdChildren(rootDom.children[0].children[0], payloads, getReactElementFromNative);
+        nodeIdForDom.set(parentId, rootDom.children[0]);
+        reactComponents = mappingDomToNodeIdChildren(rootDom.children[0], payloads, getReactElementFromNative);
       } else {
         reactComponents = mappingDomToNodeIdChildren(realDom, payloads, getReactElementFromNative, nodeType);
       }

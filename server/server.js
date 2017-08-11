@@ -3,8 +3,8 @@ const convert = require('koa-convert');
 const app = new koa();
 const staticMiddlware = require('koa-static');
 
-const remoteDebuggingPort = parseInt(process.env.REMOTE_DEBUGGING_PORT, 10) || 9224;
-const serverPort = parseInt(process.env.PORT, 10) || 8090;
+const remoteDebuggingPort = parseInt(process.env.remotePort, 10) || 9224;
+const serverPort = parseInt(process.env.frontendPort, 10) || 8090;
 
 console.log('server start on port: ', serverPort);
 
