@@ -84,14 +84,17 @@ Ant.TargetManager = class extends Common.Object {
 
   async enableEmulation(target) {
     const { width, height } = await Ant.makePromiseHostOnce('getWebviewWidthHeight');
-    const pageAgent = target.pageAgent();
-    await pageAgent.enable();
     const emulationAgent = target.emulationAgent();
     emulationAgent.setTouchEmulationEnabled(true, 'mobile');
 
     // so sad, we have to try again to override.
-    await emulationAgent.setDeviceMetricsOverride(width, height + 1, 0, true, false);
-    emulationAgent.setDeviceMetricsOverride(width, height, 0, true, false);
+    emulationAgent.invoke_setDeviceMetricsOverride({
+      width, height: height + 1, deviceScaleFactor: 0, mobile: true, fitWindow: false
+    }, () => {
+      emulationAgent.invoke_setDeviceMetricsOverride({
+        width, height: height, deviceScaleFactor: 0, mobile: true, fitWindow: false
+      });
+    });
   }
 
   setCurrent(path) {

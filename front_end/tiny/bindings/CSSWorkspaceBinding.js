@@ -81,10 +81,13 @@ Bindings.CSSWorkspaceBinding = class {
    * @return {!Bindings.CSSWorkspaceBinding.LiveLocation}
    */
   createLiveLocation(rawLocation, updateDelegate, locationPool) {
+    // ANT-IDE no need
+    /*
     var header =
         rawLocation.styleSheetId ? rawLocation.cssModel().styleSheetHeaderForId(rawLocation.styleSheetId) : null;
     return new Bindings.CSSWorkspaceBinding.LiveLocation(
         rawLocation.cssModel(), header, rawLocation, this, updateDelegate, locationPool);
+    */
   }
 
   /**

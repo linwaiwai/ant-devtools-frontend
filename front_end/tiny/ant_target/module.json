@@ -3,7 +3,8 @@
     ],
     "dependencies": [
         "common",
-        "platform"
+        "platform",
+        "emulation"
     ],
     "scripts": [
         "TargetManager.js",

@@ -371,6 +371,8 @@ Elements.ElementsPanel = class extends UI.Panel {
    * @param {?SDK.DOMDocument} inspectedRootDocument
    */
   _documentUpdated(domModel, inspectedRootDocument) {
+    // inspect mode
+
     this._reset();
     this.searchCanceled();
 
@@ -898,8 +900,10 @@ Elements.ElementsPanel = class extends UI.Panel {
     showMetrics.call(this, horizontally);
 
     this.sidebarPaneView.appendApplicableItems('elements-sidebar');
+    /* ANT-IDE
     for (var i = 0; i < extensionSidebarPanes.length; ++i)
       this._addExtensionSidebarPane(extensionSidebarPanes[i]);
+    */
 
     this._splitWidget.setSidebarWidget(this.sidebarPaneView.tabbedPane());
   }
@@ -949,8 +953,10 @@ Elements.ElementsPanel.ContextMenuProvider = class {
     // Skip adding "Reveal..." menu item for our own tree outline.
     if (Elements.ElementsPanel.instance().element.isAncestor(/** @type {!Node} */ (event.target)))
       return;
-    var commandCallback = Common.Revealer.reveal.bind(Common.Revealer, object);
-    contextMenu.appendItem(Common.UIString.capitalize('Reveal in Elements ^panel'), commandCallback);
+
+    // ANT-IDE no need
+    // var commandCallback = Common.Revealer.reveal.bind(Common.Revealer, object);
+    // contextMenu.appendItem(Common.UIString.capitalize('Reveal in Elements ^panel'), commandCallback);
   }
 };
 

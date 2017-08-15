@@ -1577,6 +1577,7 @@ function getTinyData(element) {
         case 'radio-group':
         case 'checkbox-group':
         case 'swiper':
+        case 'swiper-item':
             break;
         case 'text':
         case 'button':
@@ -1664,6 +1665,9 @@ function mappingDomToNodeIdChildren(parent, children, getReactElementFromNative,
     if (nodeType === 'swiper') {
         parent = parent.children[0].children[0];
     }
+    if (nodeType === 'swiper-item') {
+        parent = parent.children[0];
+    }
     if (nodeType === 'picker-view-column') {
         parent = parent.children[2];
     }
@@ -1671,18 +1675,22 @@ function mappingDomToNodeIdChildren(parent, children, getReactElementFromNative,
         children.forEach(function (next, index) {
             reactComponents.push('');
             nodeIdForDom.set(next.nodeId, parent.children[index]);
-            if (nodeType === 'swiper') return reactComponents;
+            if (nodeType === 'swiper') {
+                return reactComponents;
+            }
             try {
                 var reactComponent = handleTinyElemets(parent.children[index], getReactElementFromNative);
                 var speHandled = elementSpecailHandler(reactComponent);
-                appxForNodeId.set(getInternalInstance(speHandled), next.nodeId);
+                if (nodeType !== 'picker-view-column' && nodeType !== 'picker-view') appxForNodeId.set(getInternalInstance(speHandled, next.nodeId), next.nodeId);
                 reactComponents[reactComponents.length - 1] = getTinyData(speHandled);
-            } catch (e) {}
+            } catch (e) {
+                console.error(e);
+            }
         });
     }
     return reactComponents;
 }
-function elementSpecailHandler(element) {
+function elementSpecailHandler(element, id) {
     if (element.props && element.props.$tag === 'image') return element._owner._currentElement;
     return element;
 }

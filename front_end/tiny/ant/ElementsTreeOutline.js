@@ -52,6 +52,7 @@ Ant.ElementsTreeOutline = class extends Elements.ElementsTreeOutline {
         try {
           const ul = Ant.findUL(node);
           node._children = ul._children.map(child => {
+            child = child._children[0];
             child._attributes = [];
             child._attributesMap = {};
             child._localName = 'swiper-item';

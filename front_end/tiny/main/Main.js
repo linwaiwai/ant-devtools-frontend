@@ -176,7 +176,8 @@ Main.Main = class {
 
     Components.shortcutsScreen = new Components.ShortcutsScreen();
     // set order of some sections explicitly
-    Components.shortcutsScreen.section(Common.UIString('Elements Panel'));
+    // ANT-IDE no need for Elements Panel
+    // Components.shortcutsScreen.section(Common.UIString('Elements Panel'));
     Components.shortcutsScreen.section(Common.UIString('Styles Pane'));
     Components.shortcutsScreen.section(Common.UIString('Debugger'));
     Components.shortcutsScreen.section(Common.UIString('Console'));

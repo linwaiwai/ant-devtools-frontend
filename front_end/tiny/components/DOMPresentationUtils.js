@@ -115,7 +115,8 @@ Components.DOMPresentationUtils.linkifyNodeReference = function(node, idref) {
   else
     Components.DOMPresentationUtils.decorateNodeLabel(node, link);
 
-  link.addEventListener('click', Common.Revealer.reveal.bind(Common.Revealer, node, undefined), false);
+  // ANT-IDE no time for this
+  // link.addEventListener('click', Common.Revealer.reveal.bind(Common.Revealer, node, undefined), false);
   link.addEventListener('mouseover', node.highlight.bind(node, undefined, undefined), false);
   link.addEventListener('mouseleave', SDK.DOMModel.hideDOMNodeHighlight.bind(SDK.DOMModel), false);
 
