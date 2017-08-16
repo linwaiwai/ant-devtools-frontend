@@ -64,12 +64,8 @@ Ant.StoragePanel = class extends UI.VBox {
   }
 };
 
+/*
 Ant.StoragePanel.ResourceRevealer = class {
-  /**
-   * @override
-   * @param {!Object} resource
-   * @return {!Promise}
-   */
   reveal(resource) {
     if (!(resource instanceof SDK.Resource))
       return Promise.reject(new Error('Internal error: not a resource'));
@@ -77,3 +73,4 @@ Ant.StoragePanel.ResourceRevealer = class {
     return UI.viewManager.showView('resources').then(panel.showResource.bind(panel, resource));
   }
 };
+*/

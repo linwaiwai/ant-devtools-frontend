@@ -202,7 +202,7 @@ Resources.DOMStorageItemsView = class extends UI.SimpleView {
       keys.push(key);
     }
 
-    var dataGrid = new UI.DataGrid(columns, this._editingCallback.bind(this), this._deleteCallback.bind(this));
+    var dataGrid = new UI.DataGrid(columns, this._editingCallback.bind(this), this._deleteCallback.bind(this), this._refreshCallback.bind(this));
     dataGrid.setName('DOMStorageItemsView');
     length = nodes.length;
     for (var i = 0; i < length; ++i)
@@ -255,5 +255,9 @@ Resources.DOMStorageItemsView = class extends UI.SimpleView {
 
     if (this.domStorage)
       this.domStorage.removeItem(node.data.key);
+  }
+
+  _refreshCallback() {
+    this._update();    
   }
 };
