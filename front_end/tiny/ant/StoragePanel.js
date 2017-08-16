@@ -57,7 +57,7 @@ Ant.StoragePanel = class extends UI.VBox {
     if (!this._domStorage)
       return null;
     if (!this._domStorageView)
-      this._domStorageView = new Ant.DOMStorageItemsView(this._domStorage);
+      this._domStorageView = new Resources.DOMStorageItemsView(this._domStorage);
     else
       this._domStorageView.setStorage(this._domStorage);
     this.showView(this._domStorageView);
