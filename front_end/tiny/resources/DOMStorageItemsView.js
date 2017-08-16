@@ -59,6 +59,10 @@ Resources.DOMStorageItemsView = class extends UI.SimpleView {
     return [this.refreshButton, this.deleteButton];
   }
 
+  setStorage(domStorage) {
+    this.domStorage = domStorage;
+  }
+
   /**
    * @override
    */
