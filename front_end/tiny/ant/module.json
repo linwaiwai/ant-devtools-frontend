@@ -55,15 +55,20 @@
         "elements",
         "components",
         "extensions",
-        "resources"
+        "resources",
+        "data_grid"
     ],
     "scripts": [
         "AxmlPanel.js",
         "StoragePanel.js",
         "DataPanel.js",
         "AcssModel.js",
-        "ElementsTreeOutline.js"
+        "ElementsTreeOutline.js",
+        "StorageItemsView.js",
+        "DOMStorageItemsView.js"
     ],
     "resources": [
+        "resourcesPanel.css",
+        "resourcesSidebar.css"
     ]
 }

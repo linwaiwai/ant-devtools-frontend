@@ -1,7 +1,8 @@
 Ant.StoragePanel = class extends UI.VBox {
   constructor() {
     super('storage');
-    this.registerRequiredCSS('resources/resourcesPanel.css');
+    this.registerRequiredCSS('ant/resourcesPanel.css');
+    this.registerRequiredCSS('ant/resourcesSidebar.css');    
 
     this._target = SDK.targetManager.mainTarget();
 
@@ -19,17 +20,20 @@ Ant.StoragePanel = class extends UI.VBox {
 
   _addDOMStorage(domStorage) {
     if (!domStorage._isLocalStorage) return;
+    this._domStorage = domStorage;
     this.showStorage(domStorage);
   }
 
   _domStorageAdded(event) {
+    if (this._domStorageView || this._domStorage) return;
     var domStorage = /** @type {!Resources.DOMStorage} */ (event.data);
     this._addDOMStorage(domStorage);
   }
 
   _domStorageRemoved(event) {
-    var domStorage = /** @type {!Resources.DOMStorage} */ (event.data);
-    this._removeDOMStorage(domStorage);
+    // var domStorage = /** @type {!Resources.DOMStorage} */ (event.data);
+    if (this._domStorage)
+      this._removeDOMStorage(this._domStorage);
   }
 
   _removeDOMStorage(domStorage) {
@@ -49,12 +53,13 @@ Ant.StoragePanel = class extends UI.VBox {
   }
 
   showStorage(domStorage) {
-    if (!domStorage)
+    this._domStorage = domStorage;
+    if (!this._domStorage)
       return null;
     if (!this._domStorageView)
-      this._domStorageView = new Resources.DOMStorageItemsView(domStorage);
+      this._domStorageView = new Ant.DOMStorageItemsView(this._domStorage);
     else
-      this._domStorageView.setStorage(domStorage);
+      this._domStorageView.setStorage(this._domStorage);
     this.showView(this._domStorageView);
   }
 };
