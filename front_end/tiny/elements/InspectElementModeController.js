@@ -47,12 +47,13 @@ Elements.InspectElementModeController = class {
    * @override
    * @param {!SDK.Target} target
    */
+  // ANT-IDE
   targetAdded(target) {
     // When DevTools are opening in the inspect element mode, the first target comes in
     // much later than the InspectorFrontendAPI.enterInspectElementMode event.
     if (this._mode === Protocol.DOM.InspectMode.None)
       return;
-    var domModel = SDK.DOMModel.fromTarget(target);
+    var domModel = Ant.TinyModel.fromTarget(target);
     domModel.setInspectMode(this._mode);
   }
 
@@ -106,10 +107,16 @@ Elements.InspectElementModeController = class {
   /**
    * @param {!Protocol.DOM.InspectMode} mode
    */
+  // ANT-IDE
   _setMode(mode) {
     this._mode = mode;
+    /*
     for (var domModel of SDK.DOMModel.instances())
       domModel.setInspectMode(mode);
+    */
+
+    const domModel = Ant.targetManager.getCurrentModel();
+    domModel.setInspectMode(mode);
 
     if (this._layoutEditorButton) {
       this._layoutEditorButton.setEnabled(!this.isInInspectElementMode());

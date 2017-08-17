@@ -7,6 +7,7 @@ Ant.TinyModel = class extends SDK.DOMModel {
     target.registerDOMDispatcher(dispatcher);
     this._agent = target.domAgent();
     this._idToDOMNode = {};
+    this._backendIdDomNode = {};
     this._document = null;
     this._attributeLoadNodeIds = new Set();
     this._runtimeModel = /** @type {!SDK.RuntimeModel} */ (Ant.targetManager.getWorkerTarget().model(SDK.RuntimeModel));
@@ -117,6 +118,15 @@ Ant.TinyModel = class extends SDK.DOMModel {
     this._scheduleMutationEvent(node);
   }
 
+  _inspectNodeRequested(backendNodeId) {
+    const node = this._backendIdDomNode[backendNodeId];
+    const treeOutlines = Ant.ElementsTreeOutline.forDOMModel(this);
+    treeOutlines.selectDOMNode(node, true);
+
+    if (Elements.inspectElementModeController)      
+      Elements.inspectElementModeController.stopInspection();
+  }
+
   getChildNodes(callback) {
     if (this._children) {
       callback(this.children());
@@ -170,6 +180,18 @@ Ant.TinyModel = class extends SDK.DOMModel {
     }
 
     this._agent.getDocument(5, undefined, onDocumentAvailable.bind(this));
+  }
+
+  setInspectMode(mode, callback) {
+    /**
+     * @this {SDK.DOMModel}
+     */
+    function onDocumentAvailable() {
+      this._inspectModeEnabled = mode !== Protocol.DOM.InspectMode.None;
+      this.dispatchEventToListeners(SDK.DOMModel.Events.InspectModeWillBeToggled, this._inspectModeEnabled);
+      this._highlighter.setInspectMode(mode, this._buildHighlightConfig(), callback);
+    }
+    this.requestDocument(onDocumentAvailable.bind(this));
   }
 
   nodeForId(nodeId) {
@@ -238,6 +260,7 @@ Ant.DOMNode = class {
     this.id = payload.nodeId;
     this._backendNodeId = payload.backendNodeId;
     this._domModel._idToDOMNode[this.id] = this;
+    this._domModel._backendIdDomNode[this._backendNodeId] = this;
     this._nodeType = payload.nodeType;
     this._nodeName = payload.nodeName;
     this._localName = payload.localName;

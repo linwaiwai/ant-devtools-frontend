@@ -116,6 +116,11 @@ Ant.AxmlPanel = class extends Elements.ElementsPanel {
     this.searchCanceled();
 
     var treeOutline = Ant.ElementsTreeOutline.forDOMModel(domModel);
+    if (!treeOutline) {
+      domModel = Ant.targetManager.getCurrentModel();
+      inspectedRootDocument = domModel._document;
+      treeOutline = Ant.ElementsTreeOutline.forDOMModel(domModel);
+    }
     treeOutline.rootDOMNode = inspectedRootDocument;
 
     if (!inspectedRootDocument) {
@@ -161,6 +166,54 @@ Ant.AxmlPanel = class extends Elements.ElementsPanel {
       }
       this._setDefaultSelectedNode(node);
       this._lastSelectedNodeSelectedForTest();
+    }
+  }
+};
+
+Ant.AxmlPanel.DOMNodeRevealer = class {
+  /**
+   * @override
+   * @param {!Object} node
+   * @return {!Promise}
+   */
+  reveal(node) {
+    var panel = Ant.AxmlPanel.instance();
+    panel._pendingNodeReveal = true;
+
+    return new Promise(revealPromise);
+
+    /**
+     * @param {function(undefined)} resolve
+     * @param {function(!Error)} reject
+     */
+    function revealPromise(resolve, reject) {
+      if (node instanceof Ant.DOMNode) {
+        onNodeResolved(/** @type {!SDK.DOMNode} */ (node));
+      } else if (node instanceof SDK.DeferredDOMNode) {
+        (/** @type {!SDK.DeferredDOMNode} */ (node)).resolve(onNodeResolved);
+      } else if (node instanceof SDK.RemoteObject) {
+        var domModel = Ant.TinyModel.fromTarget(/** @type {!SDK.RemoteObject} */ (node).target());
+        if (domModel)
+          domModel.pushObjectAsNodeToFrontend(node, onNodeResolved);
+        else
+          reject(new Error('Could not resolve a node to reveal.'));
+      } else {
+        reject(new Error('Can\'t reveal a non-node.'));
+        panel._pendingNodeReveal = false;
+      }
+
+      /**
+       * @param {?SDK.DOMNode} resolvedNode
+       */
+      function onNodeResolved(resolvedNode) {
+        panel._pendingNodeReveal = false;
+
+        if (resolvedNode) {
+          panel.revealAndSelectNode(resolvedNode).then(resolve);
+          return;
+        }
+        reject(new Error('Could not resolve node to reveal.'));
+      }
     }
   }
 };

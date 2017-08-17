@@ -1,4 +1,3 @@
-Ant = {};
 Ant.switchTargetMutex = false;
 
 Ant.makeProxyPromiseOnce = (method, payload, callback) =>
@@ -39,11 +38,13 @@ Ant.TargetManager = class extends Common.Object {
     this._currentPath = null;
     this._currentTarget = null;
     this._currentModel = null;
+    this._touchModel = Ant.TouchModel.instance();
   }
 
   _webSocketConnectionLostCallback(path) {
-    if (path) {
+    if (path && this._targets.get(path)) {
       const { target } = this._targets.get(path);
+      Ant.TouchModel.instance().targetRemoved(target);      
       SDK.targetManager.removeTarget(target);
       this._targets.delete(path);
     }
@@ -67,12 +68,12 @@ Ant.TargetManager = class extends Common.Object {
       SDK.Target.Capability.DOM | SDK.Target.Capability.Target | SDK.Target.Capability.Browser | SDK.Target.Capability.DeviceEmulation,
       createMainConnection.bind(this, ws), null);
 
-    await this.enableEmulation(target);
-
     const tinyModel = new Ant.TinyModel(target);
     this._tinyModel.set(target, tinyModel);
     const cssModel  = new SDK.CSSModel(target, tinyModel);
     this._cssModel.set(target, cssModel);
+
+    await this.enableEmulation(target);    
 
     this._targets.set(path, { target, model: tinyModel, cssModel });
     this.setCurrent(path);
@@ -84,15 +85,18 @@ Ant.TargetManager = class extends Common.Object {
 
   async enableEmulation(target) {
     const { width, height } = await Ant.makePromiseHostOnce('getWebviewWidthHeight');
-    const emulationAgent = target.emulationAgent();
-    emulationAgent.setTouchEmulationEnabled(true, 'mobile');
+  
+    this._touchModel.targetAdded(target);
+    this._touchModel.setTouchEnabled(true, true);
+
+    const emulationAgent = target.emulationAgent();    
 
     // so sad, we have to try again to override.
     emulationAgent.invoke_setDeviceMetricsOverride({
-      width, height: height + 1, deviceScaleFactor: 0, mobile: true, fitWindow: false
+      width, height: height + 1, deviceScaleFactor: 0, mobile: true, fitWindow: false,
     }, () => {
       emulationAgent.invoke_setDeviceMetricsOverride({
-        width, height: height, deviceScaleFactor: 0, mobile: true, fitWindow: false
+        width, height: height, deviceScaleFactor: 0, mobile: true, fitWindow: false,
       });
     });
   }
@@ -133,6 +137,8 @@ Ant.TargetManager = class extends Common.Object {
   }
 
   async switchTarget() {
+    if (Elements.inspectElementModeController)      
+      Elements.inspectElementModeController.stopInspection();
     const { path, ws } = await Ant.makeProxyPromiseOnce('initOnce');
     const ret = await Ant.targetManager.addNewTarget(path, ws);
     if (ret)

@@ -34,7 +34,7 @@
                 "SDK.DeferredDOMNode",
                 "SDK.RemoteObject"
             ],
-            "className": "Elements.ElementsPanel.DOMNodeRevealer"
+            "className": "Ant.AxmlPanel.DOMNodeRevealer"
         },
         {
             "type": "@Common.Revealer",

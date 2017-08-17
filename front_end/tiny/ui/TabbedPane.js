@@ -805,7 +805,7 @@ UI.TabbedPane = class extends UI.VBox {
       this._leftToolbar = new UI.Toolbar('tabbed-pane-left-toolbar');
 
       // ANT-IDE no time for this
-      // this._headerElement.insertBefore(this._leftToolbar.element, this._headerElement.firstChild);
+      this._headerElement.insertBefore(this._leftToolbar.element, this._headerElement.firstChild);
     }
     return this._leftToolbar;
   }

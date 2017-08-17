@@ -1723,8 +1723,6 @@ SDK.DOMModel = class extends SDK.SDKModel {
    * @param {function(?Protocol.Error)=} callback
    */
   setInspectMode(mode, callback) {
-    console.error('inspectMode');
-
     /**
      * @this {SDK.DOMModel}
      */
