@@ -179,34 +179,6 @@
             "type": "@UI.ViewLocationResolver",
             "name": "elements-sidebar",
             "className": "Elements.ElementsPanel"
-        },
-        {
-            "type": "view",
-            "location": "elements-sidebar",
-            "id": "elements.eventListeners",
-            "title": "Event Listeners",
-            "order": 5,
-            "hasToolbar": true,
-            "persistence": "permanent",
-            "className": "Elements.EventListenersWidget"
-        },
-        {
-            "type": "view",
-            "location": "elements-sidebar",
-            "id": "elements.domBreakpoints",
-            "title": "DOM Breakpoints",
-            "order": 6,
-            "persistence": "permanent",
-            "factoryName": "Components.DOMBreakpointsSidebarPane.Proxy"
-        },
-        {
-            "type": "view",
-            "location": "elements-sidebar",
-            "id": "elements.domProperties",
-            "title": "Properties",
-            "order": 7,
-            "persistence": "permanent",
-            "className": "Elements.PropertiesWidget"
         }
     ],
     "dependencies": [

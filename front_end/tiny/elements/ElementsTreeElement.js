@@ -585,6 +585,9 @@ Elements.ElementsTreeElement = class extends TreeElement {
   _startEditingAttribute(attribute, elementForSelection) {
     console.assert(this.listItemElement.isAncestor(attribute));
 
+    // ANT-IDE cannot edit attribute
+    return false;
+
     if (UI.isBeingEdited(attribute))
       return true;
 
@@ -671,6 +674,9 @@ Elements.ElementsTreeElement = class extends TreeElement {
    * @param {!Element=} tagNameElement
    */
   _startEditingTagName(tagNameElement) {
+    // ANT-IDE can not edit tag
+    return false
+
     if (!tagNameElement) {
       tagNameElement = this.listItemElement.getElementsByClassName('webkit-html-tag-name')[0];
       if (!tagNameElement)

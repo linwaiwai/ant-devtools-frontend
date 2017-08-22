@@ -125,6 +125,10 @@ Ant.ElementsTreeOutline = class extends Elements.ElementsTreeOutline {
     console.assert(!treeElement.isClosingTag());
     this._innerUpdateChildren(treeElement);
   }
+
+  showContextMenu(treeElement, event) {
+    // 不显示右键
+  }
 };
 
 Ant.combineNativeAndReactDom = (dom, data) => {
