@@ -1,17 +1,18 @@
+const ipcRenderer = require('electron').ipcRenderer;
+
 window.sendToHost = function () {
-  const ipcRenderer = require('electron').ipcRenderer;
   ipcRenderer.sendToHost.apply(ipcRenderer, arguments);
 };
 
 window.listenToHost = function () {
-  const ipcRenderer = require('electron').ipcRenderer;
   ipcRenderer.on.apply(ipcRenderer, arguments);
 };
 
 window.listenToHostOnce = function () {
-  const ipcRenderer = require('electron').ipcRenderer;
   ipcRenderer.once.apply(ipcRenderer, arguments);
 };
+
+ipcRenderer.setMaxListeners(0);
 
 window.ondragover = () => false;
 window.ondragleave = () => false;

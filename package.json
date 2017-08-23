@@ -1,7 +1,7 @@
 {
   "name": "ant-devtools-frontend",
   "description": "Ant DevTools UI From Chrome",
-  "version": "0.4.13",
+  "version": "0.4.16",
   "scripts": {
     "build": "gulp --gulpfile scripts/gulp/gulpfile.js",
     "build:webview": "webpack -w",

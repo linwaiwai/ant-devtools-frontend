@@ -6,7 +6,7 @@ Ant.makeProxyPromiseOnce = (method, payload, callback) =>
       const { payload, error } = args;
       if (error) return reject(error);
       const timeout = setTimeout(function() {
-        reject('timeout');
+        return reject('timeout');
       }, 2000);
       if (callback && (typeof callback) === 'function') {
         clearTimeout(timeout);        
@@ -26,7 +26,7 @@ Ant.makePromiseHostOnce = (method, payload, callback) =>
   new Promise((resolve, reject) => {
     window.listenToHostOnce('main', (event, args) => {
       const timeout = setTimeout(function() {
-        reject('timeout');
+        return reject('timeout');
       }, 2000);
       if (callback && (typeof callback) === 'function') {
         clearTimeout(timeout);

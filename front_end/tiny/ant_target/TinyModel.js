@@ -111,7 +111,7 @@ Ant.TinyModel = class extends SDK.DOMModel {
   _childNodeRemoved(parentId, nodeId) {
     var parent = this._idToDOMNode[parentId];
     var node = this._idToDOMNode[nodeId];
-    if (!node) return;
+    if (!node || !parent) return;
     parent._removeChild(node);
     this._unbind(node);
     this.dispatchEventToListeners(SDK.DOMModel.Events.NodeRemoved, {node: node, parent: parent});

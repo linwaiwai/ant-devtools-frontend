@@ -110,34 +110,35 @@ function decorateMany(source, fns) {
 }
 
 function setupBackend(hook) {
-  if (Object.keys(hook._renderers).length !== 2) {
-    setTimeout(() => {
+  if (!checkReactRenderFromHook(hook)) {
+    return setTimeout(() => {
       setupBackend(hook);
-    }, 500);
-  } else {
-    for (var rid in hook._renderers) {
-      const renderer = hook._renderers[rid];
-      decorateResult(renderer.Mount, '_renderNewRootComponent', (internalInstance) => {
-        hook.emit('root', { renderer: rid, internalInstance });
-      });
-      decorateMany(renderer.Reconciler, {
-        mountComponent(internalInstance, rootID, transaction, context) {
-          var data = getData(internalInstance);
-          rootNodeIDMap.set(internalInstance, data.props);
-          hook.emit('mount', { internalInstance, data, renderer: rid });
-        },
-        performUpdateIfNecessary(internalInstance, nextChild, transaction, context) {
-          hook.emit('update', { internalInstance, data: getData(internalInstance), renderer: rid });
-        },
-        receiveComponent(internalInstance, nextChild, transaction, context) {
-          hook.emit('update', { internalInstance, data: getData(internalInstance), renderer: rid });
-        },
-        unmountComponent(internalInstance) {
-          hook.emit('unmount', { internalInstance, renderer: rid });
-        },
-      });
-    }
+    }, 300);
   }
+  for (var rid in hook._renderers) {
+    const renderer = hook._renderers[rid];
+    if (!hook._renderers[rid].Mount._instancesByReactRootID) continue;
+    decorateResult(renderer.Mount, '_renderNewRootComponent', (internalInstance) => {
+      hook.emit('root', { renderer: rid, internalInstance });
+    });
+    decorateMany(renderer.Reconciler, {
+      mountComponent(internalInstance, rootID, transaction, context) {
+        var data = getData(internalInstance);
+        rootNodeIDMap.set(internalInstance, data.props);
+        hook.emit('mount', { internalInstance, data, renderer: rid });
+      },
+      performUpdateIfNecessary(internalInstance, nextChild, transaction, context) {
+        hook.emit('update', { internalInstance, data: getData(internalInstance), renderer: rid });
+      },
+      receiveComponent(internalInstance, nextChild, transaction, context) {
+        hook.emit('update', { internalInstance, data: getData(internalInstance), renderer: rid });
+      },
+      unmountComponent(internalInstance) {
+        hook.emit('unmount', { internalInstance, renderer: rid });
+      },
+    });
+  }
+}
 }
 
 function findOwner(element) {
@@ -321,28 +322,49 @@ function elementSpecailHandler(element, id) {
 function detectGetReactElementFromNative(dom) {
   for (const rid in globalHook._renderers) {
     const render = globalHook._renderers[rid];
-    let reactComponent = null;
+    if (!render.Mount._instancesByReactRootID) continue;
+    let instanceIsRight = false;
     try {
-      reactComponent = render.ComponentTree.getClosestInstanceFromNode(dom);
-    } catch (e) { console.error('detect', e); }
-    if (reactComponent) {
-      return {
-        getReactElementFromNative: render.ComponentTree.getClosestInstanceFromNode,
-        rootReactDom: reactComponent,
+      if (render.Mount._instancesByReactRootID[1]._hostContainerInfo._node.id === '__react-content') instanceIsRight = true;
+    } catch (e) {}
+    if (instanceIsRight) {
+      let reactComponent = null;
+      try {
+        reactComponent = render.ComponentTree.getClosestInstanceFromNode(dom);
+      } catch (e) { console.error('detect', e); return {}; }
+      if (reactComponent) {
+        return {
+          getReactElementFromNative: render.ComponentTree.getClosestInstanceFromNode,
+          rootReactDom: reactComponent,
+        }
       }
     }
   }
+  return {};
 }
 
 let count = 0;
 let initReady = false;
 const maxTryOut = 10;
 
+function checkReactRenderFromHook(hook) {
+  let ready = false;
+  if (!hook || !hook._renderers) return ready;
+  for (var rid in hook._renderers) {
+    debugger;
+    if (!hook._renderers[rid].Mount._instancesByReactRootID) continue;
+    ready = true;    
+  }
+  return ready;
+}
+
 function checkReactReady(callback) {
   if (count === maxTryOut) return callback(false);
   count++;
   try {
     const rootDom = document.getElementById('__react-content');
+    debugger;
+    if (!checkReactRenderFromHook(globalHook)) throw new Error('react is not ready');
     const { getReactElementFromNative } = detectGetReactElementFromNative(rootDom.children[0].children[0]);
     if (getReactElementFromNative && window.__chromePort__) {
       count = 0;

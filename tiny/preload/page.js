@@ -1368,33 +1368,33 @@ function decorateMany(source, fns) {
     return olds;
 }
 function setupBackend(hook) {
-    if ((0, _keys2.default)(hook._renderers).length !== 2) {
-        setTimeout(function () {
+    if (!checkReactRenderFromHook(hook)) {
+        return setTimeout(function () {
             setupBackend(hook);
-        }, 500);
-    } else {
-        for (var rid in hook._renderers) {
-            var renderer = hook._renderers[rid];
-            decorateResult(renderer.Mount, '_renderNewRootComponent', function (internalInstance) {
-                hook.emit('root', { renderer: rid, internalInstance: internalInstance });
-            });
-            decorateMany(renderer.Reconciler, {
-                mountComponent: function mountComponent(internalInstance, rootID, transaction, context) {
-                    var data = getData(internalInstance);
-                    rootNodeIDMap.set(internalInstance, data.props);
-                    hook.emit('mount', { internalInstance: internalInstance, data: data, renderer: rid });
-                },
-                performUpdateIfNecessary: function performUpdateIfNecessary(internalInstance, nextChild, transaction, context) {
-                    hook.emit('update', { internalInstance: internalInstance, data: getData(internalInstance), renderer: rid });
-                },
-                receiveComponent: function receiveComponent(internalInstance, nextChild, transaction, context) {
-                    hook.emit('update', { internalInstance: internalInstance, data: getData(internalInstance), renderer: rid });
-                },
-                unmountComponent: function unmountComponent(internalInstance) {
-                    hook.emit('unmount', { internalInstance: internalInstance, renderer: rid });
-                }
-            });
-        }
+        }, 300);
+    }
+    for (var rid in hook._renderers) {
+        var renderer = hook._renderers[rid];
+        if (!hook._renderers[rid].Mount._instancesByReactRootID) continue;
+        decorateResult(renderer.Mount, '_renderNewRootComponent', function (internalInstance) {
+            hook.emit('root', { renderer: rid, internalInstance: internalInstance });
+        });
+        decorateMany(renderer.Reconciler, {
+            mountComponent: function mountComponent(internalInstance, rootID, transaction, context) {
+                var data = getData(internalInstance);
+                rootNodeIDMap.set(internalInstance, data.props);
+                hook.emit('mount', { internalInstance: internalInstance, data: data, renderer: rid });
+            },
+            performUpdateIfNecessary: function performUpdateIfNecessary(internalInstance, nextChild, transaction, context) {
+                hook.emit('update', { internalInstance: internalInstance, data: getData(internalInstance), renderer: rid });
+            },
+            receiveComponent: function receiveComponent(internalInstance, nextChild, transaction, context) {
+                hook.emit('update', { internalInstance: internalInstance, data: getData(internalInstance), renderer: rid });
+            },
+            unmountComponent: function unmountComponent(internalInstance) {
+                hook.emit('unmount', { internalInstance: internalInstance, renderer: rid });
+            }
+        });
     }
 }
 function findOwner(element) {
@@ -1557,28 +1557,49 @@ function elementSpecailHandler(element, id) {
 function detectGetReactElementFromNative(dom) {
     for (var rid in globalHook._renderers) {
         var render = globalHook._renderers[rid];
-        var reactComponent = null;
+        if (!render.Mount._instancesByReactRootID) continue;
+        var instanceIsRight = false;
         try {
-            reactComponent = render.ComponentTree.getClosestInstanceFromNode(dom);
-        } catch (e) {
-            console.error('detect', e);
-        }
-        if (reactComponent) {
-            return {
-                getReactElementFromNative: render.ComponentTree.getClosestInstanceFromNode,
-                rootReactDom: reactComponent
-            };
+            if (render.Mount._instancesByReactRootID[1]._hostContainerInfo._node.id === '__react-content') instanceIsRight = true;
+        } catch (e) {}
+        if (instanceIsRight) {
+            var reactComponent = null;
+            try {
+                reactComponent = render.ComponentTree.getClosestInstanceFromNode(dom);
+            } catch (e) {
+                console.error('detect', e);
+                return {};
+            }
+            if (reactComponent) {
+                return {
+                    getReactElementFromNative: render.ComponentTree.getClosestInstanceFromNode,
+                    rootReactDom: reactComponent
+                };
+            }
         }
     }
+    return {};
 }
 var count = 0;
 var initReady = false;
 var maxTryOut = 10;
+function checkReactRenderFromHook(hook) {
+    var ready = false;
+    if (!hook || !hook._renderers) return ready;
+    for (var rid in hook._renderers) {
+        debugger;
+        if (!hook._renderers[rid].Mount._instancesByReactRootID) continue;
+        ready = true;
+    }
+    return ready;
+}
 function checkReactReady(callback) {
     if (count === maxTryOut) return callback(false);
     count++;
     try {
         var rootDom = document.getElementById('__react-content');
+        debugger;
+        if (!checkReactRenderFromHook(globalHook)) throw new Error('react is not ready');
 
         var _detectGetReactElemen = detectGetReactElementFromNative(rootDom.children[0].children[0]),
             getReactElementFromNative = _detectGetReactElemen.getReactElementFromNative;
