@@ -336,7 +336,7 @@ function detectGetReactElementFromNative(dom) {
 
 let count = 0;
 let initReady = false;
-const maxTryOut = 5;
+const maxTryOut = 10;
 
 function checkReactReady(callback) {
   if (count === maxTryOut) return callback(false);

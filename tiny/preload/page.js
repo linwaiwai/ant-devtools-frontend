@@ -1573,7 +1573,7 @@ function detectGetReactElementFromNative(dom) {
 }
 var count = 0;
 var initReady = false;
-var maxTryOut = 5;
+var maxTryOut = 10;
 function checkReactReady(callback) {
     if (count === maxTryOut) return callback(false);
     count++;

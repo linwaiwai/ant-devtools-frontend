@@ -152,11 +152,14 @@ Ant.TargetManager = class extends Common.Object {
   async switchTarget() {
     try {
       Elements.inspectElementModeController.stopInspection();
+    } catch (e) {}
+
+    try {
       const { path, ws } = await Ant.makeProxyPromiseOnce('initOnce');
       const ret = await Ant.targetManager.addNewTarget(path, ws);
       if (ret)
         this.dispatchEventToListeners(Ant.TargetManager.Events.switchTarget);
-    } catch (e) { }
+    } catch (e) {}
   }
 
   addModel(target, modelClass, model) {
