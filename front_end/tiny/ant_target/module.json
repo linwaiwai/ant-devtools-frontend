@@ -10,7 +10,8 @@
         "TouchModel.js",        
         "TargetManager.js",
         "TinyModel.js",
-        "TinyConnection.js"
+        "TinyConnection.js",
+        "events.js"
     ],
     "resources": [
     ]

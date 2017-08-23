@@ -248,9 +248,9 @@ function getProps(element) {
   return props;
 }
 
-const sendMessage = ({ method, payload }) => {
+const sendMessage = ({ method, payload, error }) => {
   ipc.sendToHost('devtools', {
-    method, payload,
+    method, payload, error,
   })
 }
 
@@ -335,17 +335,18 @@ function detectGetReactElementFromNative(dom) {
 }
 
 let count = 0;
+let initReady = false;
 const maxTryOut = 5;
 
 function checkReactReady(callback) {
-  if (count === maxTryOut) return;
+  if (count === maxTryOut) return callback(false);
   count++;
   try {
     const rootDom = document.getElementById('__react-content');
     const { getReactElementFromNative } = detectGetReactElementFromNative(rootDom.children[0].children[0]);
     if (getReactElementFromNative && window.__chromePort__) {
       count = 0;
-      callback();
+      callback(true);
     } else {
       setTimeout(function() {
         checkReactReady(callback);
@@ -360,17 +361,24 @@ function checkReactReady(callback) {
 
 const messageHandler = {
   initOnce: () => {
-    checkReactReady(() => {
-      fetchRemoteUrl((payload) => {
+    checkReactReady((ready) => {
+      if (ready) {
+        initReady = true;
+        fetchRemoteUrl((payload) => {
+          sendMessage({
+            method: 'initOnce',
+            payload,
+          });
+        })
+      } else {
         sendMessage({
-          method: 'initOnce',
-          payload,
-        });
-      })
+          error: 'react is not ready',
+        })
+      }
     })
   },
   refresh: () => {
-    sendMessage({ method: 'switchTarget' });
+    sendMessage({ method: 'switchTarget' });                  
   },
   setDocumentNodeIdOnce: ({ root }) => {
     const rootDom = document.getElementById('__react-content');
@@ -408,6 +416,9 @@ const messageHandler = {
 // handle all messages from devtools
 ipc.on('devtools', (event, args) => {
   const { method, payload } = args;
+  if (!initReady)
+    if (['refresh', 'initOnce'].indexOf(method) === -1)
+      return sendMessage({ error: 'react is not ready' });
   if (messageHandler[method]) {
     messageHandler[method](payload);
   } else {

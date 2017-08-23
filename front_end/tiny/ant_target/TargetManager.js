@@ -3,7 +3,8 @@ Ant.switchTargetMutex = false;
 Ant.makeProxyPromiseOnce = (method, payload, callback) =>
   new Promise((resolve, reject) => {
     window.listenToHostOnce(`render-${method}`, (event, args) => {
-      const { payload } = args;
+      const { payload, error } = args;
+      if (error) return reject(error);
       if (callback && (typeof callback) === 'function')
         resolve(callback(payload));
       else
@@ -44,7 +45,7 @@ Ant.TargetManager = class extends Common.Object {
   _webSocketConnectionLostCallback(path) {
     if (path && this._targets.get(path)) {
       const { target } = this._targets.get(path);
-      Ant.TouchModel.instance().targetRemoved(target);      
+      Ant.TouchModel.instance().targetRemoved(target);
       SDK.targetManager.removeTarget(target);
       this._targets.delete(path);
     }
@@ -70,10 +71,10 @@ Ant.TargetManager = class extends Common.Object {
 
     const tinyModel = new Ant.TinyModel(target);
     this._tinyModel.set(target, tinyModel);
-    const cssModel  = new SDK.CSSModel(target, tinyModel);
+    const cssModel = new SDK.CSSModel(target, tinyModel);
     this._cssModel.set(target, cssModel);
 
-    await this.enableEmulation(target);    
+    await this.enableEmulation(target);
 
     this._targets.set(path, { target, model: tinyModel, cssModel });
     this.setCurrent(path);
@@ -85,11 +86,11 @@ Ant.TargetManager = class extends Common.Object {
 
   async enableEmulation(target) {
     const { width, height } = await Ant.makePromiseHostOnce('getWebviewWidthHeight');
-  
+
     this._touchModel.targetAdded(target);
     this._touchModel.setTouchEnabled(true, true);
 
-    const emulationAgent = target.emulationAgent();    
+    const emulationAgent = target.emulationAgent();
 
     // so sad, we have to try again to override.
     emulationAgent.invoke_setDeviceMetricsOverride({
@@ -137,12 +138,13 @@ Ant.TargetManager = class extends Common.Object {
   }
 
   async switchTarget() {
-    if (Elements.inspectElementModeController)      
+    try {
       Elements.inspectElementModeController.stopInspection();
-    const { path, ws } = await Ant.makeProxyPromiseOnce('initOnce');
-    const ret = await Ant.targetManager.addNewTarget(path, ws);
-    if (ret)
-      this.dispatchEventToListeners(Ant.TargetManager.Events.switchTarget);
+      const { path, ws } = await Ant.makeProxyPromiseOnce('initOnce');
+      const ret = await Ant.targetManager.addNewTarget(path, ws);
+      if (ret)
+        this.dispatchEventToListeners(Ant.TargetManager.Events.switchTarget);
+    } catch (e) { }
   }
 
   addModel(target, modelClass, model) {

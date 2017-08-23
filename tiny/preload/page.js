@@ -1485,10 +1485,11 @@ function getProps(element) {
 }
 var sendMessage = function sendMessage(_ref4) {
     var method = _ref4.method,
-        payload = _ref4.payload;
+        payload = _ref4.payload,
+        error = _ref4.error;
 
     _electron.ipcRenderer.sendToHost('devtools', {
-        method: method, payload: payload
+        method: method, payload: payload, error: error
     });
 };
 function fetchRemoteUrl(callback) {
@@ -1571,9 +1572,10 @@ function detectGetReactElementFromNative(dom) {
     }
 }
 var count = 0;
+var initReady = false;
 var maxTryOut = 5;
 function checkReactReady(callback) {
-    if (count === maxTryOut) return;
+    if (count === maxTryOut) return callback(false);
     count++;
     try {
         var rootDom = document.getElementById('__react-content');
@@ -1583,7 +1585,7 @@ function checkReactReady(callback) {
 
         if (getReactElementFromNative && window.__chromePort__) {
             count = 0;
-            callback();
+            callback(true);
         } else {
             setTimeout(function () {
                 checkReactReady(callback);
@@ -1597,13 +1599,20 @@ function checkReactReady(callback) {
 }
 var messageHandler = {
     initOnce: function initOnce() {
-        checkReactReady(function () {
-            fetchRemoteUrl(function (payload) {
-                sendMessage({
-                    method: 'initOnce',
-                    payload: payload
+        checkReactReady(function (ready) {
+            if (ready) {
+                initReady = true;
+                fetchRemoteUrl(function (payload) {
+                    sendMessage({
+                        method: 'initOnce',
+                        payload: payload
+                    });
                 });
-            });
+            } else {
+                sendMessage({
+                    error: 'react is not ready'
+                });
+            }
         });
     },
     refresh: function refresh() {
@@ -1657,6 +1666,7 @@ _electron.ipcRenderer.on('devtools', function (event, args) {
     var method = args.method,
         payload = args.payload;
 
+    if (!initReady) if (['refresh', 'initOnce'].indexOf(method) === -1) return sendMessage({ error: 'react is not ready' });
     if (messageHandler[method]) {
         messageHandler[method](payload);
     } else {

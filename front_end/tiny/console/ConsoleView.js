@@ -1324,6 +1324,9 @@ Console.ConsoleView.ActionDelegate = class {
         return true;
       case 'console.clear':
         Console.ConsoleView.clearConsole();
+
+        // ANT-IDE
+        Ant.Events.dispatchEvent('console.clear');
         return true;
       case 'console.clear.history':
         Console.ConsoleView.instance()._clearHistory();
