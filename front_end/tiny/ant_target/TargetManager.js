@@ -5,10 +5,16 @@ Ant.makeProxyPromiseOnce = (method, payload, callback) =>
     window.listenToHostOnce(`render-${method}`, (event, args) => {
       const { payload, error } = args;
       if (error) return reject(error);
-      if (callback && (typeof callback) === 'function')
+      const timeout = setTimeout(function() {
+        reject('timeout');
+      }, 2000);
+      if (callback && (typeof callback) === 'function') {
+        clearTimeout(timeout);        
         resolve(callback(payload));
-      else
+      } else {
+        clearTimeout(timeout);        
         resolve(payload);
+      }
     });
     window.sendToHost('render', {
       method,
@@ -19,10 +25,16 @@ Ant.makeProxyPromiseOnce = (method, payload, callback) =>
 Ant.makePromiseHostOnce = (method, payload, callback) =>
   new Promise((resolve, reject) => {
     window.listenToHostOnce('main', (event, args) => {
-      if (callback && (typeof callback) === 'function')
+      const timeout = setTimeout(function() {
+        reject('timeout');
+      }, 2000);
+      if (callback && (typeof callback) === 'function') {
+        clearTimeout(timeout);
         resolve(callback(args));
-      else
+      } else {
+        clearTimeout(timeout);        
         resolve(args);
+      }
     });
     window.sendToHost('main', {
       method,
