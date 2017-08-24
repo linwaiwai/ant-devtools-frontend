@@ -400,6 +400,9 @@ const messageHandler = {
     })
   },
   refresh: () => {
+    nodeIdForDom.clear();
+    appxForNodeId.clear();
+    rootNodeIDMap.clear();
     sendMessage({ method: 'switchTarget' });                  
   },
   setDocumentNodeIdOnce: ({ root }) => {
@@ -426,6 +429,10 @@ const messageHandler = {
         reactComponents = mappingDomToNodeIdChildren(realDom, payloads, getReactElementFromNative, nodeType);
       }
     }
+
+    console.log(realDom);
+    console.log(reactComponents);
+
     sendMessage({
       method: 'setChildNodeIdOnce',
       payload: {
